@@ -5,9 +5,11 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.*
@@ -44,47 +46,58 @@ fun VitalsTab() {
         modifier = Modifier
             .fillMaxSize()
             .background(Background)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 18.dp)
     ) {
-        Text(
-            "PATIENT VITALS",
-            style = MaterialTheme.typography.labelSmall,
-            color = TextSecondary,
-            letterSpacing = 2.sp
-        )
+        VitalsHeader()
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Heart Rate Monitor
-        Card(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
-            colors = CardDefaults.cardColors(containerColor = Surface),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Border)
+                .height(214.dp)
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color(0xA61C1C21))
+                .border(1.dp, White.copy(alpha = 0.10f), RoundedCornerShape(30.dp))
+                .padding(16.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Favorite, contentDescription = null, tint = EmergencyRed)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("HEART RATE", color = TextSecondary, fontSize = 12.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    GlassVitalIcon(Icons.Default.Favorite, EmergencyRed)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text("Heart rate", color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text("Live rhythm", color = TextSecondary, fontSize = 12.sp)
                     }
-                    Text("$heartRate BPM", color = TextPrimary, fontWeight = FontWeight.Black, fontSize = 24.sp)
                 }
-                
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "$heartRate BPM",
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 24.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0x8C111116))
+                    .border(1.dp, White.copy(alpha = 0.08f), RoundedCornerShape(22.dp))
+                    .padding(12.dp)
+            ) {
                 ECGGraph(modifier = Modifier.fillMaxSize(), color = PulseColor)
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             VitalCard(
                 label = "SpO2",
                 value = "$spo2%",
@@ -101,20 +114,22 @@ fun VitalsTab() {
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Diagnosis Summary
-        Text("AI PRELIMINARY ASSESSMENT", style = MaterialTheme.typography.labelSmall, color = TextSecondary)
-        Spacer(modifier = Modifier.height(8.dp))
-        Surface(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(12.dp))
-                .padding(16.dp),
-            color = Color.Transparent
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color(0xA61C1C21))
+                .border(1.dp, White.copy(alpha = 0.10f), RoundedCornerShape(28.dp))
+                .padding(16.dp)
         ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                StatusDot(SuccessGreen)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("AI preliminary assessment", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 "Patient vitals are currently stable. Normal sinus rhythm detected. Oxygen saturation is within optimal range.",
                 color = TextPrimary,
@@ -126,19 +141,80 @@ fun VitalsTab() {
 }
 
 @Composable
-fun VitalCard(label: String, value: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = Surface),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Border)
+private fun VitalsHeader() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(Color(0xCC202025))
+            .border(1.dp, White.copy(alpha = 0.11f), RoundedCornerShape(28.dp))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(label, color = TextSecondary, fontSize = 12.sp)
-            Text(value, color = TextPrimary, fontWeight = FontWeight.Black, fontSize = 20.sp)
+        GlassVitalIcon(Icons.Default.MonitorHeart, PulseColor)
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text("Patient Vitals", color = TextPrimary, fontSize = 21.sp, fontWeight = FontWeight.Black)
+            Text("Live patient monitoring", color = TextSecondary, fontSize = 12.sp)
+        }
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(18.dp))
+                .background(SuccessGreen.copy(alpha = 0.12f))
+                .border(1.dp, SuccessGreen.copy(alpha = 0.24f), RoundedCornerShape(18.dp))
+                .padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            StatusDot(SuccessGreen)
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("Stable", color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         }
     }
+}
+
+@Composable
+fun VitalCard(label: String, value: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .height(86.dp)
+            .clip(RoundedCornerShape(28.dp))
+            .background(Color(0xA61C1C21))
+            .border(1.dp, White.copy(alpha = 0.10f), RoundedCornerShape(28.dp))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        GlassVitalIcon(icon, color)
+        Spacer(modifier = Modifier.width(10.dp))
+        Column {
+            Text(label, color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+            Spacer(modifier = Modifier.height(3.dp))
+            Text(value, color = TextPrimary, fontWeight = FontWeight.Black, fontSize = 20.sp, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun GlassVitalIcon(icon: ImageVector, color: Color) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(White.copy(alpha = 0.08f))
+            .border(1.dp, White.copy(alpha = 0.11f), CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+    }
+}
+
+@Composable
+private fun StatusDot(color: Color) {
+    Box(
+        modifier = Modifier
+            .size(7.dp)
+            .clip(CircleShape)
+            .background(color)
+    )
 }
 
 @Composable

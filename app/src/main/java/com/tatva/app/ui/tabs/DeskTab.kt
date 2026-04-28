@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,74 +51,128 @@ fun DeskTab(gemmaManager: GemmaManager) {
             .background(Background)
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Status Row
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color(0xCC202025))
+                .border(1.dp, White.copy(alpha = 0.11f), RoundedCornerShape(28.dp))
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(White.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Chat,
+                    contentDescription = null,
+                    tint = TextPrimary.copy(alpha = 0.9f),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Tatva Desk",
+                    color = TextPrimary,
+                    fontSize = 21.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = "Offline medical guidance",
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    maxLines = 1
+                )
+            }
+            AiStatusPill(aiStatus = aiStatus, isReady = isAiReady)
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            StatusCard("HEART RATE", "72 BPM", PulseColor, Modifier.weight(1f))
-            StatusCard("SIGNAL", "CONNECTED", SuccessGreen, Modifier.weight(1f))
-            StatusCard("AI STATUS", aiStatus, ActionBlue, Modifier.weight(1.2f))
+            StatusCard("HEART", "72 BPM", PulseColor, Modifier.weight(1f))
+            StatusCard("SIGNAL", "ONLINE", SuccessGreen, Modifier.weight(1f))
+            StatusCard("ENGINE", if (isAiReady) "READY" else "SYNC", ActionBlue, Modifier.weight(1f))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Chat Area
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Surface)
-                .border(1.dp, Border, RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color(0xA61C1C21))
+                .border(1.dp, White.copy(alpha = 0.10f), RoundedCornerShape(30.dp))
         ) {
-            // Background Glow
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        Brush.verticalGradient(
-                            listOf(Color.Transparent, PulseColor.copy(alpha = 0.05f))
+                        Brush.radialGradient(
+                            colors = listOf(
+                                PulseColor.copy(alpha = 0.08f),
+                                Color.Transparent
+                            ),
+                            radius = 760f
                         )
                     )
             )
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(chatMessages) { (text, isUser) ->
-                    ChatBubble(text, isUser)
-                }
-                
-                if (isTyping) {
-                    item {
-                        TypingIndicator()
+            if (chatMessages.isEmpty() && !isTyping) {
+                EmptyDeskState(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(28.dp)
+                )
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(chatMessages) { (text, isUser) ->
+                        ChatBubble(text, isUser)
+                    }
+
+                    if (isTyping) {
+                        item {
+                            TypingIndicator()
+                        }
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Input Area
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color(0xE6222227))
+                .border(1.dp, White.copy(alpha = 0.12f), RoundedCornerShape(30.dp))
+                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextField(
                 value = inputText,
                 onValueChange = { inputText = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Ask anything...", color = TextSecondary, fontSize = 14.sp) },
+                placeholder = { Text("Ask for first-aid guidance", color = TextSecondary, fontSize = 14.sp) },
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Surface,
-                    unfocusedContainerColor = Surface,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
                     focusedTextColor = TextPrimary,
                     unfocusedTextColor = TextPrimary,
                     cursorColor = TextPrimary,
@@ -127,9 +182,7 @@ fun DeskTab(gemmaManager: GemmaManager) {
                 shape = RoundedCornerShape(24.dp),
                 singleLine = true
             )
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
+
             FilledIconButton(
                 onClick = {
                     if (inputText.isNotBlank() && isAiReady && !isTyping) {
@@ -165,17 +218,110 @@ fun DeskTab(gemmaManager: GemmaManager) {
 
 @Composable
 fun StatusCard(label: String, value: String, accentColor: Color, modifier: Modifier = Modifier) {
-    Column(
+    Row(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(Surface)
-            .border(1.dp, Border, RoundedCornerShape(12.dp))
-            .padding(vertical = 12.dp),
+            .height(54.dp)
+            .clip(RoundedCornerShape(27.dp))
+            .background(Color(0xB3222227))
+            .border(1.dp, White.copy(alpha = 0.09f), RoundedCornerShape(27.dp))
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(accentColor)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = label,
+                color = TextSecondary,
+                fontSize = 9.sp,
+                lineHeight = 10.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            Spacer(modifier = Modifier.height(3.dp))
+            Text(
+                text = value,
+                color = TextPrimary,
+                fontSize = 13.sp,
+                lineHeight = 15.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+private fun AiStatusPill(aiStatus: String, isReady: Boolean) {
+    val statusColor = if (isReady) SuccessGreen else WarningOrange
+
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(statusColor.copy(alpha = 0.12f))
+            .border(1.dp, statusColor.copy(alpha = 0.24f), RoundedCornerShape(18.dp))
+            .padding(horizontal = 10.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .clip(CircleShape)
+                .background(statusColor)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = if (isReady) "Ready" else aiStatus,
+            color = TextPrimary,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun EmptyDeskState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = TextSecondary, fontSize = 8.sp, letterSpacing = 1.sp)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(value, style = MaterialTheme.typography.bodySmall, color = accentColor, fontWeight = FontWeight.Black)
+        Box(
+            modifier = Modifier
+                .size(58.dp)
+                .clip(CircleShape)
+                .background(White.copy(alpha = 0.08f))
+                .border(1.dp, White.copy(alpha = 0.12f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Chat,
+                contentDescription = null,
+                tint = TextPrimary.copy(alpha = 0.82f),
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+        Text(
+            text = "Ask what to do next",
+            color = TextPrimary,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Black
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(
+            text = "Describe the injury, symptom, or emergency.",
+            color = TextSecondary,
+            fontSize = 13.sp
+        )
     }
 }
 
@@ -193,18 +339,29 @@ fun ChatBubble(text: String, isUser: Boolean) {
             contentAlignment = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
         ) {
             Surface(
-                color = if (isUser) TextPrimary else Border,
+                color = if (isUser) TextPrimary else Color(0xD92A2A30),
                 shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp,
-                    bottomStart = if (isUser) 16.dp else 4.dp,
-                    bottomEnd = if (isUser) 4.dp else 16.dp
+                    topStart = 20.dp,
+                    topEnd = 20.dp,
+                    bottomStart = if (isUser) 20.dp else 6.dp,
+                    bottomEnd = if (isUser) 6.dp else 20.dp
                 ),
-                modifier = Modifier.widthIn(max = 280.dp)
+                modifier = Modifier
+                    .widthIn(max = 292.dp)
+                    .border(
+                        1.dp,
+                        if (isUser) Color.Transparent else White.copy(alpha = 0.08f),
+                        RoundedCornerShape(
+                            topStart = 20.dp,
+                            topEnd = 20.dp,
+                            bottomStart = if (isUser) 20.dp else 6.dp,
+                            bottomEnd = if (isUser) 6.dp else 20.dp
+                        )
+                    )
             ) {
                 Text(
                     text = text,
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                     color = if (isUser) Background else TextPrimary,
                     style = MaterialTheme.typography.bodyMedium,
                     lineHeight = 20.sp
@@ -225,7 +382,8 @@ fun TypingIndicator() {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(Border)
+                .background(Color(0xD92A2A30))
+                .border(1.dp, White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
